@@ -12,30 +12,49 @@
 
 <body>
     <input type="text" id="text">
-    <button id="btn">确定</button>
-    <button id="btnShow">显示Text</button>
-    <input type="text" id=showText>
+    <button id="btn">添加房源</button>
+    <input type="text" id="_landlordAddr">
+    <input type="text" id="_houseID">
+    <input type="text" id="_area">
+    <input type="text" id="_price">
+    <input type="text" id="_location">
+    <input type="text" id="_cash_pledge">
+    <button id="btnSearch">搜索房屋</button>
+    <input type="text" id="1111">
+    <input type="text" id="belong">
+    <input type="text" id="houseID">
+    <input type="text" id="price_month">
+    <input type="text" id="cash_pledge">
     <script>
-        var CONTRCAT_ADDRESS = "0xf03280bbdba11bd2a6a1ba2b6926476f4a73c5fc";
+        var CONTRCAT_ADDRESS = "0xc6f85289025d8d4c7a804c13c61ccb73901f2c28";
         //8546是node1的--rpcport可以设置
         var web3Provider = new Web3.providers.HttpProvider("HTTP://127.0.0.1:8545");
         var web3 = new Web3(web3Provider);
 
-        $("#btnShow").click(function () {
-            $.getJSON("./build/contracts/HelloWorld.json", function (data) {
+        $("#btnSearch").click(function () {
+            $.getJSON("./build/contracts/ChainHome.json", function (data) {
                 var helloworld = web3.eth.contract(data.abi).at(CONTRCAT_ADDRESS);
-                $("#showText").val(helloworld.main());
+                var a=helloworld.getHouseByHouseId($("#1111").val())
+                $("#belong").val(a[0]);
+                $("#houseID").val(a[1]);
+                $("#price_month").val(a[2]);
+                $("#cash_pledge").val(a[3]);
             });
         });
         $("#btn").click(function () {
             var text = $("#text").val();
-            $.getJSON("./build/contracts/HelloWorld.json", function (data) {
+            $.getJSON("./build/contracts/ChainHome.json", function (data) {
                 var helloworld = web3.eth.contract(data.abi).at(CONTRCAT_ADDRESS);
                 var param = {
                     from: web3.eth.accounts[0]
                 }
-                helloworld.setTEXT(text, param);
-                $("#content").html($("#content").html() + helloworld.main() + "<br/>");
+                var _landlordAddr=$("#_landlordAddr").val();
+                var _houseID=$("#_houseID").val();
+                var _area=$("#_area").val();
+                var _price=$("#_price").val();
+                var _location=$("#_location").val();
+                var _cash_pledge=$("#_cash_pledge").val();
+                helloworld.addHouse(_landlordAddr,_houseID, _area,_price,_location,_cash_pledge,param);
             });
         });
 

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Page Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
+</head>
+
+<body>
+    <input type="text" id="text">
+    <button id="btn">确定</button>
+    <button id="btnShow">显示Text</button>
+    <input type="text" id=showText>
+    <script>
+        var CONTRCAT_ADDRESS = "0xf03280bbdba11bd2a6a1ba2b6926476f4a73c5fc";
+        //8546是node1的--rpcport可以设置
+        var web3Provider = new Web3.providers.HttpProvider("HTTP://127.0.0.1:8545");
+        var web3 = new Web3(web3Provider);
+
+        $("#btnShow").click(function () {
+            $.getJSON("./build/contracts/HelloWorld.json", function (data) {
+                var helloworld = web3.eth.contract(data.abi).at(CONTRCAT_ADDRESS);
+                $("#showText").val(helloworld.main());
+            });
+        });
+        $("#btn").click(function () {
+            var text = $("#text").val();
+            $.getJSON("./build/contracts/HelloWorld.json", function (data) {
+                var helloworld = web3.eth.contract(data.abi).at(CONTRCAT_ADDRESS);
+                var param = {
+                    from: web3.eth.accounts[0]
+                }
+                helloworld.setTEXT(text, param);
+                $("#content").html($("#content").html() + helloworld.main() + "<br/>");
+            });
+        });
+
+    </script>
+</body>
+
+</html>

@@ -1,5 +1,4 @@
 pragma solidity 0.4.24;
-import "./UtilsLib.sol";
 contract ChainHome{
     address owner;//系统拥有者
     uint totalAmount;//系统中所有充值金额的和
@@ -56,22 +55,13 @@ contract ChainHome{
         withdrawAmount=0;
         owner=msg.sender;
     }
-    //增加权限控制 ，某些方法只能由合约的创建者调用
-    modifier onlyOwner(){
-        if(msg.sender!=owner) throw;
-        _;
-    }
-    //返回合约调用者地址
-    function getOwner() constant returns(address){
-        return owner;
-    }
     //注册成为房东
     event NewLandLord(address sender,bool isSuccess,string message);
     function newLandLord(address _landlordAddr,string _passwd){
         //判断是否已经注册 
         if(!isLandlordAlreadyIn(_landlordAddr)){//没有注册
             landlord[_landlordAddr].landlordAddr=_landlordAddr;
-            landlord[_landlordAddr].passwd=UtilsLib.stringToBytes32(_passwd);
+            landlord[_landlordAddr].passwd=stringToBytes32(_passwd);
             landlords.push(_landlordAddr);
             NewLandLord(msg.sender,true,"注册成功");
             return;
@@ -86,8 +76,10 @@ contract ChainHome{
         //判断是否已经注册 
         if(!isTenantsAlreadyIn(_tenantAddr)){
             tenant[_tenantAddr].tenantAddr=_tenantAddr;
-            tenant[_tenantAddr].passwd=UtilsLib.stringToBytes32(_passwd);
+            tenant[_tenantAddr].passwd=stringToBytes32(_passwd);
             tenant[_tenantAddr].frozenBalance=0;
+//初始化金额为10000
+			tenant[_tenantAddr].balance=10000;
             tenants.push(_tenantAddr);
             NewTenant(msg.sender,true,"注册成功");
             return;
@@ -127,12 +119,12 @@ contract ChainHome{
     //添加房源
     event AddHouse(address sender,bool isSuccess,string message);
     function addHouse(address _landlordAddr,string _houseID,uint _area,uint _price,string _location,uint _cash_pledge){
-        bytes32 tempID=UtilsLib.stringToBytes32(_houseID);
+        bytes32 tempID=stringToBytes32(_houseID);
         if(!isHouseAlreadyIn(tempID)){//该房屋未被注册
             house[tempID].houseID=tempID;
             house[tempID].belong=_landlordAddr;
             house[tempID].area=_area;
-			house[tempID].location=UtilsLib.stringToBytes32(_location);
+			house[tempID].location=stringToBytes32(_location);
             house[tempID].price_month=_price;
             house[tempID].end_time=now;
             house[tempID].signed_time=now;
@@ -151,13 +143,20 @@ contract ChainHome{
         }
     }
     //根据房屋id获取房屋信息（所有者，房屋id,月租，押金）
-    event GetHouseByHouseId(address sender,bytes32 houseID,uint price_month,uint cash_pledge);
+    event GetHouseByHouseId(address belong,string houseID,uint price_month,uint cash_pledge,string message);
     function getHouseByHouseId(string houseID)returns(address,bytes32,uint,uint){
-        bytes32 _houseID = UtilsLib.stringToBytes32(houseID);
+        bytes32 _houseID = stringToBytes32(houseID);
         if(isHouseAlreadyIn(_houseID)){
-            GetHouseByHouseId(msg.sender,_houseID,house[_houseID].price_month,house[_houseID].cash_pledge);
-            return (house[_houseID].belong,_houseID,house[_houseID].price_month,house[_houseID].cash_pledge);
+			if(house[_houseID].isRented==false){
+	            GetHouseByHouseId(house[_houseID].belong,houseID,house[_houseID].price_month,house[_houseID].cash_pledge,"查找成功");
+            	return (house[_houseID].belong,_houseID,house[_houseID].price_month,house[_houseID].cash_pledge);
+			}else{		
+	          GetHouseByHouseId(house[_houseID].belong,houseID,house[_houseID].price_month,house[_houseID].cash_pledge,"该房屋已经被租");
+          	  return (0x0,0,0,0);
+			}
         }else{
+
+	            GetHouseByHouseId(0x0,houseID,0,0,"该房屋不存在");
             return (0x0,0,0,0);
         }
     }
@@ -168,7 +167,7 @@ contract ChainHome{
             bytes32 _houseID=houses[i];
             if(house[_houseID].isRented==false && house[_houseID].isDisuse==false )
                 continue;
-            if(house[_houseID].location==UtilsLib.stringToBytes32(keywords)){
+            if(house[_houseID].location==stringToBytes32(keywords)){
                 return (house[_houseID].belong,_houseID,house[_houseID].price_month,house[_houseID].cash_pledge);
             }
         }  
@@ -178,7 +177,7 @@ contract ChainHome{
     //更新房屋信息
     event UpdateHouseInfo(address sender,bytes32 houseID,bool isSuccess,string message);
     function updateHouseInfo(string _houseID,uint price,uint _cash_pledge)returns(bool){
-        bytes32 tempID=UtilsLib.stringToBytes32(_houseID);
+        bytes32 tempID=stringToBytes32(_houseID);
         if(house[tempID].isEnsured==false&&house[tempID].isRented==false){
             UpdateHouseInfo(house[tempID].belong,tempID,false,"有租赁请求未处理，请处理后再修改");
         }else{
@@ -192,7 +191,7 @@ contract ChainHome{
     //移除房源
     event DeleteHouse(address sender,bytes32 houseID,bool isSuccess,string message);
     function deleteHouse(address _landlordAddr,string houseID){
-        bytes32 tempID=UtilsLib.stringToBytes32(houseID);
+        bytes32 tempID=stringToBytes32(houseID);
         house[tempID].isDisuse=true;
         DeleteHouse(_landlordAddr,tempID,true,"该房屋被移出房源");
     }
@@ -200,8 +199,8 @@ contract ChainHome{
     //租房，并冻结金额
     event RentHouse(address sender,bytes32 houseID,uint _months,bool isSuccess,string message);
     function rentHouse(address _tenantAddr,string _houseID,uint _months)returns(bool){
-        bytes32 tempID=UtilsLib.stringToBytes32(_houseID);
-        if(isHouseAlreadyIn(tempID)){
+        bytes32 tempID=stringToBytes32(_houseID);
+        if(isHouseAlreadyIn(tempID)&&(house[tempID].isRented==false)){
             if(tenant[_tenantAddr].balance<house[tempID].price_month+house[tempID].cash_pledge){
                 RentHouse(_tenantAddr,tempID,_months,false,"余额不足以支付押金以及首月金额");
                 return false;
@@ -221,7 +220,7 @@ contract ChainHome{
     //房东确认交易
     event EnsureRentDeal(address sender,bytes32 houseID,uint _months,bool isSuccess,string message);
     function ensureRentDeal(address _landlordAddr,string houseID,uint _months,bool isEnsured)returns(bool){
-        bytes32 tempID=UtilsLib.stringToBytes32(houseID);
+        bytes32 tempID=stringToBytes32(houseID);
         address _tenantAddr=house[tempID].beRentBy;
         if(isEnsured){//房东确认交易
             if(house[tempID].isEnsured==false){//防止房东重复确认
@@ -247,6 +246,17 @@ contract ChainHome{
         }
     }
     
+	event GetBalance(address user,uint balance,string message);
+    function getBalanceLandlord(address _landlordAddr)returns(uint){
+        GetBalance(_landlordAddr,landlord[_landlordAddr].balance,"查询成功");
+        return landlord[_landlordAddr].balance;
+    }
+    function getBalance(address _tenantAddr)returns(uint){
+        GetBalance(_tenantAddr,tenant[_tenantAddr].balance,"查询成功");
+        return tenant[_tenantAddr].balance;
+    }
+    
+	
     //获取房东密码
     function getLandlordPasswd(address _landlordAddr)constant returns(bool,bytes32){
         if(isLandlordAlreadyIn(_landlordAddr)){
@@ -262,7 +272,7 @@ contract ChainHome{
             return(false,"");
         }
     }
-    //为租户充值
+    
     event RechargeFoTenantByAddress(address sender,string message);
     function rechargeForTenantByAddress(address _receiver,uint _amount){
         if(isTenantsAlreadyIn(_receiver)){
@@ -286,4 +296,30 @@ contract ChainHome{
             Withdraw(msg.sender,"提现成功");
         }
     }
+
+    function stringToBytes32(string memory source)constant internal returns(bytes32 result){
+        assembly{
+            result := mload(add(source,32))
+        }
+    }
+    
+    function bytes32ToString(bytes32 x)constant internal returns (string) { 
+        bytes memory bytesString = new bytes(32);
+        uint charCount = 0;
+        for (uint j = 0; j < 32; j++) { 
+            byte char = byte(bytes32(uint(x) * 2 ** (8 * j))); 
+            if (char != 0) { 
+                bytesString[charCount] = char;
+                charCount++; 
+            } 
+        } 
+        bytes memory bytesStringTrimmed = new bytes(charCount);
+        for (j = 0; j < charCount; j++) {
+            bytesStringTrimmed[j] = bytesString[j]; 
+            
+        } 
+        return string(bytesStringTrimmed); 
+        
+    }
+
 }

@@ -1,0 +1,17 @@
+body{
+    background-image:url(/bootstrap/houndstooth-pattern.png);
+}
+
+#back
+{
+    width: 580px;
+    position: absolute;
+    left: 30%;
+}
+.input-group{
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+.col-lg-6{
+    display: block;
+}

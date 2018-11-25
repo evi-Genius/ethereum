@@ -2,63 +2,138 @@
 <html>
 
 <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Page Title</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
+  <title>HomeChain，有你的地方就有家</title>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
+  <script src="/bootstrap/js/bootstrap.min.js"></script>
+  <link href="/bootstrap/css/base.css" rel="stylesheet">
+  <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <script src="./app.js"></script>
 </head>
 
 <body>
-    <input type="text" id="text">
-    <button id="btn">添加房源</button>
-    <input type="text" id="_landlordAddr">
-    <input type="text" id="_houseID">
-    <input type="text" id="_area">
-    <input type="text" id="_price">
-    <input type="text" id="_location">
-    <input type="text" id="_cash_pledge">
-    <button id="btnSearch">搜索房屋</button>
-    <input type="text" id="1111">
-    <input type="text" id="belong">
-    <input type="text" id="houseID">
-    <input type="text" id="price_month">
-    <input type="text" id="cash_pledge">
-    <script>
-        var CONTRCAT_ADDRESS = "0xc6f85289025d8d4c7a804c13c61ccb73901f2c28";
-        //8546是node1的--rpcport可以设置
-        var web3Provider = new Web3.providers.HttpProvider("HTTP://127.0.0.1:8545");
-        var web3 = new Web3(web3Provider);
+  <div id="back">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h1 class="panel-title">To be a new member 注册</h1>
+      </div>
+      <div class="panel-body">
+        <div class="input-group">
+          <span class="input-group-addon" id="basic-addon1">ID</span>
+          <input type="text" id="_landlordAddr" class="form-control" placeholder="e.g., 0x93e66d9baea28c17d9fc393b53e3fbdd76899dae"
+            aria-describedby="basic-addon1">
+        </div>
+        <div class="input-group">
+          <span class="input-group-addon" id="basic-addon1">密码</span>
+          <input type="text" id="_passwd" class="form-control" placeholder="" aria-describedby="basic-addon1">
+        </div>
+        <div class="btn-group" role="group" aria-label="...">
+          <button id="send1" type="button" class="btn btn-default" onclick="App.newLandlord()">成为房东</button>
+          <button id="send2" type="button" class="btn btn-default" onclick="App.newTenant()">成为租户</button>
+        </div>
+      </div>
+    </div>
 
-        $("#btnSearch").click(function () {
-            $.getJSON("./build/contracts/ChainHome.json", function (data) {
-                var helloworld = web3.eth.contract(data.abi).at(CONTRCAT_ADDRESS);
-                var a=helloworld.getHouseByHouseId($("#1111").val())
-                $("#belong").val(a[0]);
-                $("#houseID").val(a[1]);
-                $("#price_month").val(a[2]);
-                $("#cash_pledge").val(a[3]);
-            });
-        });
-        $("#btn").click(function () {
-            var text = $("#text").val();
-            $.getJSON("./build/contracts/ChainHome.json", function (data) {
-                var helloworld = web3.eth.contract(data.abi).at(CONTRCAT_ADDRESS);
-                var param = {
-                    from: web3.eth.accounts[0]
-                }
-                var _landlordAddr=$("#_landlordAddr").val();
-                var _houseID=$("#_houseID").val();
-                var _area=$("#_area").val();
-                var _price=$("#_price").val();
-                var _location=$("#_location").val();
-                var _cash_pledge=$("#_cash_pledge").val();
-                helloworld.addHouse(_landlordAddr,_houseID, _area,_price,_location,_cash_pledge,param);
-            });
-        });
 
-    </script>
+
+
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">add new Home for rent 添加房源</h3>
+      </div>
+      <div class="panel-body">
+        <div>
+          <div class="row">
+            <div class="col-lg-6">
+              <div class="input-group">
+                <input type="text" class="form-control" placeholder="房东addr">
+                <span class="input-group-btn">
+                  <button id="send" class="btn btn-default" onclick="App.getBalance_landlord()" type="button">查询余额</button>
+                </span>
+              </div><!-- /input-group -->
+            </div><!-- /.col-lg-6 -->
+          </div><!-- /.row -->
+          <div class="input-group">
+            <span class="input-group-addon" id="basic-addon1">房产证</span>
+            <input type="text" id="_houseID" class="form-control" placeholder="" aria-describedby="basic-addon1">
+          </div>
+          <div class="input-group">
+            <span class="input-group-addon" id="basic-addon1">面积</span>
+            <input type="text" id="_area" class="form-control" placeholder="" aria-describedby="basic-addon1">
+          </div>
+          <div class="input-group">
+            <span class="input-group-addon" id="basic-addon1">月租</span>
+            <input type="text" id="_price" class="form-control" placeholder="" aria-describedby="basic-addon1">
+          </div>
+          <div class="input-group">
+            <span class="input-group-addon" id="basic-addon1">地段</span>
+            <input type="text" id="_location" class="form-control" placeholder="" aria-describedby="basic-addon1">
+          </div>
+          <div class="input-group">
+            <span class="input-group-addon" id="basic-addon1">押金</span>
+            <input type="text" id="_cash_pledge" class="form-control" placeholder="" aria-describedby="basic-addon1">
+          </div>
+          <button type="button" class="btn btn-default" onclick="App.newLandlord()">添加</button>
+        </div>
+      </div>
+    </div>
+
+
+
+
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">根据房产证查询房屋信息</h3>
+      </div>
+      <div class="panel-body">
+        <div class="input-group">
+          <span class="input-group-addon" id="basic-addon1">房产证</span>
+          <input type="text" id="_houseID1" class="form-control" placeholder="" aria-describedby="basic-addon1">
+        </div>
+        <button type="button" class="btn btn-default" id="send" onclick="App.getHouseById()">查询</button>
+        <div class="input-group">
+          <span class="input-group-addon" id="basic-addon1">房东addr</span>
+          <input type="text" id="belong" class="form-control" placeholder="" aria-describedby="basic-addon1">
+        </div>
+        <div class="input-group">
+          <span class="input-group-addon" id="basic-addon1">房产证</span>
+          <input type="text" id="_houseID2" class="form-control" placeholder="" aria-describedby="basic-addon1">
+        </div>
+        <div class="input-group">
+          <span class="input-group-addon" id="basic-addon1">月租</span>
+          <input type="text" id="price_month" class="form-control" placeholder="" aria-describedby="basic-addon1">
+        </div>
+        <div class="input-group">
+          <span class="input-group-addon" id="basic-addon1">押金</span>
+          <input type="text" id="cash_pledge" class="form-control" placeholder="" aria-describedby="basic-addon1">
+        </div>
+      </div>
+    </div>
+
+
+
+
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">租客租房</h3>
+      </div>
+      <div class="panel-body">
+        <div class="input-group">
+          <span class="input-group-addon" id="basic-addon1">租户addr</span>
+          <input type="text" id="_tenantAddr" class="form-control" placeholder="" aria-describedby="basic-addon1">
+        </div>
+        <button type="button" class="btn btn-default" id="send" onclick="App.getBalance_tenant()">查询余额</button>
+        <span id="_tenantBalance"></span>
+
+        <div class="input-group">
+          <span class="input-group-addon" id="basic-addon1">租期（月）</span>
+          <input type="text" id="_months" class="form-control" placeholder="" aria-describedby="basic-addon1">
+        </div>
+        <button type="button" class="btn btn-default" id="send" onclick="App.rentHouse()">租房</button>
+      </div>
+    </div>
+    <span class="hint"><strong>Hint:</strong> open the browser developer console to view any errors and warnings.</span>
+  </div>
+
 </body>
-
 </html>

@@ -3,16 +3,21 @@
 
 <head>
   <title>HomeChain，有你的地方就有家</title>
-  <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+  <link href="./bootstrap/css/base.css" rel="stylesheet">
+  <link href="./bootstrap/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/jquery@1.12.4/dist/jquery.min.js"></script>
-  <script src="/bootstrap/js/bootstrap.min.js"></script>
-  <link href="/bootstrap/css/base.css" rel="stylesheet">
-  <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-  <script src="./app.js"></script>
+  <script src="./bootstrap/js/bootstrap.min.js"></script>
+  <script src="https://cdn.bootcss.com/bootstrap-table/1.11.1/bootstrap-table.min.js"></script>
+  <script src="https://cdn.bootcss.com/bootstrap-table/1.11.1/locale/bootstrap-table-zh-CN.min.js"></script>
 </head>
 
 <body>
   <div id="back">
+
+    <div class="page-header" style="">
+      <h1>HomeChain <small>有你的地方就有家</small></h1>
+    </div>
+
     <div class="panel panel-default">
       <div class="panel-heading">
         <h1 class="panel-title">To be a new member 注册</h1>
@@ -34,7 +39,40 @@
       </div>
     </div>
 
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">浏览房源</h3>
+      </div>
+      <div class="panel-body">
 
+        <table data-toggle="table" >
+          <thead>
+            <tr>
+              <th id="addr">房产证</th>
+              <th id="cost">月租</th>
+              <th id="price">押金</th>
+              <th id="place">地段</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1</td>
+              <td>Item 1</td>
+              <td>$1</td>
+              <td>$1</td>
+            </tr>
+            <tr>
+              <td>2</td>
+              <td>Item 2</td>
+              <td>$2</td>
+              <td>$2</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <button type="button" class="btn btn-default" onclick="App.getAllHouse()">刷新</button>
+      </div>
+    </div>
 
 
     <div class="panel panel-default">
@@ -77,8 +115,6 @@
         </div>
       </div>
     </div>
-
-
 
 
     <div class="panel panel-default">
@@ -136,4 +172,5 @@
   </div>
 
 </body>
+
 </html>
